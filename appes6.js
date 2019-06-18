@@ -66,7 +66,58 @@ class UI {
     }
 }
 
+//Local Storage Class
 
+class store {
+    static getBook(){
+        let books;
+        if(localStorage.getItem('book')===null){
+            books = [];
+        }else{
+            books.JSON.parse(localStorage.getItem('books'));
+        }
+        return books;
+    }
+
+    static displayBook(){
+        const books = store.getBooks();
+
+        books.forEach(function(book){
+            const ui = new UI;
+
+         // Add book to UI
+         ui.addBookToList(book);   
+        })
+            
+    }
+
+    static addBook(book){
+        const books = store.getBook();
+
+        books.push(book);
+
+        localStorage.setItem('books',JSON.stringify(books));
+
+
+    }
+
+    static removeBook(isbn){
+
+        const books = store.getBooks();
+
+        books.forEach(function(book,index){
+            if(book.isbn === isbn){
+                books.splice(index,1);
+            }
+        });
+
+        localStorage.setItem('books',JSON.stringify(books));
+
+    }
+}
+
+//DOM Load Event
+document.addEventListener('DOMContentLoaded,store.displayBooks');
 
 // Event Listeners for add book
 document.getElementById('book-form').addEventListener('submit',
@@ -89,13 +140,16 @@ document.getElementById('book-form').addEventListener('submit',
             ui.showAlert('please fill in all fields', 'error');
         } else {
 
-            //Add book to list 
+        //Add book to list 
             ui.addBookToList(book);
 
-            //Show success
+        //add to LS 
+            store.addBook(book);   
+
+        //Show success
             ui.showAlert('Book Added!', 'success');
 
-            //Clear fields 
+        //Clear fields 
             ui.clearFields();
         }
         e.preventDefault();
@@ -110,6 +164,9 @@ document.getElementById('book-list').addEventListener
 
         // Delete book
         ui.deleteBook(e.target);
+
+        //Remove from LS
+        store.removeBook(e.target.parentElement.previousElementSibiling.textContent);
 
         //Show message
         ui.showAlert('Book Removed', 'success');
